@@ -1,0 +1,129 @@
+:root{
+	--body-background-color: #f5f6f7;
+	--font-color: #4e4e4e;
+	--border-gray-color : #dadada;
+	--naver-green-color: #04c75a;
+	--naver-green-border-color: #06b350;
+}
+
+body {
+    font-family: 'Noto Sans', sans-serif; /* 네이버와 유사한 폰트 */
+    background-image: url('../image/login.jpg'); /* 여기에 이미지 경로를 넣어주세요 */
+    background-size: cover; /* 배경 이미지 크기 조정 */
+    background-position: center; /* 배경 이미지 위치 조정 */
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.9; /* 배경이 조금 투명하게 보이도록 조정 */
+}
+
+/* 나머지 CSS 코드는 그대로 유지 */
+
+h1 {
+    color: #fff; /* 네이버 로고 색상 */
+    font-size: 3em;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 1px 1px 0 #1dbf73, -1px -1px 0 #1dbf73, 1px -1px 0 #1dbf73, -1px 1px 0 #1dbf73;
+    /*#1dbf74*/
+}
+
+p {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #fff;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 5px; /* 둥근 모서리 */
+    background-color: #1dbf73; /* 네이버 로그인 버튼 색상 */
+    color: #fff;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #17a05b; /* 버튼 호버 색상 */
+    transform: translateY(-2px);
+}
+
+fieldset {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto 30px;
+    padding: 30px;
+    border: none;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+legend {
+    font-size: 2em;
+    color: #555;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+
+}
+
+label {
+    display: block;
+    font-size: 1.1em;
+    margin-bottom: 7px;
+    color: #7f8c8d;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="tel"] {
+    width: calc(100% - 20px);
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 2px solid #bdc3c7;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus {
+    border-color: #1dbf73; /* 포커스 시 색상 */
+    box-shadow: 0 0 5px rgba(29, 191, 115, 0.5);
+}
+
+.loader {
+    display: none;
+    text-align: center;
+}
+
+.loader img {
+    width: 60px;
+    height: 60px;
+}
+
+.main-page {
+    text-align: center;
+    margin-top: 60px;
+}
+
+form {
+    margin-top: 30px;
+}

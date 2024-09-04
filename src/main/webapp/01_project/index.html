@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 관리</title>
+    <link rel="stylesheet" href="../css/style.css">
+    
+</head>
+
+
+<body>
+    <div class="main-page">
+        <h1>Login Page</h1>
+        <p>아이디: <span id="userGreeting">사용자님</span> 안녕하세요!</p>
+        <button id="signupButton">회원가입</button>
+        <button id="loginButton">로그인</button>
+        <button id="deleteAccountButton">회원탈퇴</button>
+        <button id="boardButton">게시판</button>
+        
+    </div>
+
+    <form id="login" style="display: none;">
+        <fieldset>
+            <legend>로그인</legend>
+            <div>
+                <label for="login_user_id">아이디</label>
+                <input type="text" name="login_user_id" id="login_user_id"/>
+            </div>
+            
+
+			<div>
+                <label for="login_user_password">비밀번호</label>
+                <input type="password" name="login_user_password" id="login_user_password"/>
+                <div id="login_pwdDiv"></div>
+            </div>
+            <div>
+                <input type="submit" value="로그인"/>
+            </div>
+            <div class="loader"><img src="../image/loader.gif" alt="loader..."></div>
+        </fieldset>
+    </form>
+
+   <form id="signup" action="signup.jsp" method="post" style="display: none;">
+    <fieldset>
+        <legend>회원가입</legend>
+      <!--   <div>
+            <label for="signup_user_id">아이디</label>
+            <input type="text" name="signup_user_id" id="signup_user_id"/>
+        </div>
+         -->
+        	<div>
+				<label for="signup_user_id">아이디</label> <input type="text"
+					name="signup_user_id" id="signup_user_id" />
+				<div id="id_check_result"></div>
+				<!-- 중복 검사 결과를 표시할 영역 -->
+			</div>
+			
+        <div>
+            <label for="signup_user_password">비밀번호</label>
+            <input type="password" name="signup_user_password" id="signup_user_password"/>
+        </div>
+        <div>
+            <label for="email">이메일</label>
+            <input type="email" name="email" id="email">
+        </div>
+        <div>
+            <label for="name">이름</label>
+            <input type="text" name="name" id="name">
+        </div>
+        <div>
+            <label for="phone">핸드폰</label>
+            <input type="tel" name="phone" id="phone">
+        </div>
+        <div>
+            <input type="submit" value="회원가입"/>
+        </div>
+        
+    </fieldset>
+</form>
+
+
+    
+   <!--  <form id="delete_account" style="display: none;">
+        <fieldset>
+            <legend>회원탈퇴</legend>
+            <div>
+                <label for="delete_user_id">아이디</label>
+                <input type="text" name="delete_user_id" id="delete_user_id" readonly/>
+            </div>
+            <div>
+                <input type="submit" value="회원탈퇴"/>
+            </div>
+            <div class="loader"><img src="../image/loader.gif" alt="loader..."></div>
+        </fieldset>
+    </form> -->
+    
+    
+  <!--회원탈퇴폼은 도저히 구현이 안됨   <form id="delete_account" action="deleteAccount.jsp" method="post" style="display: none;">
+    <fieldset>
+        <legend>회원탈퇴</legend>
+        <div>
+            <label for="delete_user_id">아이디</label>
+            <input type="text" name="delete_user_id" id="delete_user_id" readonly/>
+        </div>
+        <div>
+            <input type="submit" value="회원탈퇴"/>
+        </div>
+    </fieldset>
+</form>
+ -->
+   <script src="http://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script type="text/javascript">
+$('#signup').bind('submit', function(e){
+    e.preventDefault();
+    
+    var signupData = {
+        signup_user_id: $('#signup_user_id').val(),
+        signup_user_password: $('#signup_user_password').val(),
+        email: $('#email').val(),
+        name: $('#name').val(),
+        phone: $('#phone').val()
+    };
+    
+    
+    $.ajax({
+        type: 'POST',
+        url: '../project/signup.jsp',
+        data: signupData,
+        success: function(response) {
+        	 if (response === "success") {
+                 alert('회원가입이 성공적으로 처리되었습니다.');
+                 $('#signup').hide();
+                 $('#login').show();
+             } else {
+                 alert('회원가입이 정상적으로 완료되었습니다.');
+             }
+         },
+         error: function() {
+             alert('회원가입 중 오류가 발생했습니다.');
+         }
+         });
+});
+
+
+$(function() {
+    var loggedIn = false;
+    var registeredUserId = '';
+
+    // 버튼 클릭 이벤트 처리
+    $('#signupButton').on('click', function(){
+        $('#signup').show();
+        $('#login').hide();
+        $('#delete_account').hide();
+        $('.main-page').hide();
+    });
+
+    $('#loginButton').on('click', function(){
+        $('#login').show();
+        $('#signup').hide();
+        $('#delete_account').hide();
+        $('.main-page').hide();
+    });
+
+    $('#deleteAccountButton').on('click', function() {
+        if (loggedIn) {
+            $('#delete_account').show();
+            $('#login').hide();
+            $('#signup').hide();
+            $('.main-page').hide();
+        } else {
+            alert("로그인 후 이용 가능합니다.");
+        }
+    });
+    
+/*     $('#login').bind('submit', function(e){
+        e.preventDefault();
+        var inputUserId = $('#login_user_id').val();
+        var inputUserPassword = $('#login_user_password').val();
+
+        $.ajax({
+            type: 'GET',
+            url: '../project/login.jsp',
+            data: {
+                user_id: inputUserId,
+                user_password: inputUserPassword
+            },
+            success: function(response) {
+                console.log('Server response:', response); // 응답 데이터 로그
+                if (response.trim() === "success") {
+                    alert('로그인 성공! 안녕하세요 ' + inputUserId + '님');
+                    loggedIn = true;
+                    $('#userGreeting').text(inputUserId);
+                    $('#login').hide();
+                    $('#delete_account').show();
+                    $('.main-page').show();
+                } else {
+                    alert('아이디 또는 비밀번호가 잘못되었습니다.');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('AJAX 요청 실패:', textStatus, errorThrown);
+                alert('로그인 중 오류가 발생했습니다.');
+            }
+        });
+    });
+ */
+ 
+//중복검사 
+ $(document).ready(function() {
+     $('#signup_user_id').on('focusout', function() {
+         var userId = $(this).val();
+         
+         // 입력값이 없을 경우 검사하지 않음
+         if (userId === '') {
+             $('#id_check_result').text('');
+             return;
+         }
+         
+         $.ajax({
+             type: 'GET',  // 또는 'POST'
+             url: '../project/checkUserId.jsp',  // 서버에 요청할 JSP 파일 경로
+             data: { signup_user_id: userId },
+             success: function(response) {
+                 if (response.trim() === "available") {
+                     $('#id_check_result').text('사용 가능한 아이디입니다.').css('color', 'green');
+                 } else {
+                     $('#id_check_result').text('이미 사용 중인 아이디입니다.').css('color', 'red');
+                 }
+             },
+             error: function() {
+                 $('#id_check_result').text('아이디 중복검사 fail.').css('color', 'red');
+             }
+         });
+     });
+ });
+ 
+ //로그인 login.jsp 구현
+ // 로그인 폼 처리
+$('#login').bind('submit', function(e){
+    e.preventDefault();
+    var inputUserId = $('#login_user_id').val();
+    var inputUserPassword = $('#login_user_password').val();
+
+    $.ajax({
+        type: 'GET',  // 또는 'POST'로 변경 가능
+        url: '../project/login.jsp', // json 파일이 아닌 login.jsp로 요청을 보냄
+        data: {
+            user_id: inputUserId,
+            user_password: inputUserPassword
+        },
+        success: function(response) {
+            if (response.trim() === "success") {
+                alert('로그인 성공! 안녕하세요 ' + inputUserId + '님');
+                loggedIn = true;
+                $('#userGreeting').text(inputUserId);
+                $('#delete_user_id').val(inputUserId);
+                $('#login').hide();
+                $('#delete_account').show();
+                $('.main-page').show();
+            } else {
+                alert('아이디 또는 비밀번호가 잘못되었습니다.');
+            }
+        },
+        error: function() {
+            alert('로그인 중 오류가 발생했습니다.');
+        }
+    });
+});
+
+
+    // 로그인 폼 처리
+ /*   $('#login').bind('submit', function(e){
+        e.preventDefault();
+        var inputUserId = $('#login_user_id').val();
+        var inputUserPassword = $('#login_user_password').val();
+
+        $.ajax({
+            type: 'get',
+            url: '../json/json04.json',
+            data: {
+                user_id: inputUserId,
+                user_password: inputUserPassword
+            },
+            success: function(response) {
+                var users = response.users;
+                var validUser = users.find(function(user) {
+                    return user.user_id === inputUserId && user.user_password === inputUserPassword;
+                });
+
+                if (validUser) {
+                    alert('로그인 성공! 안녕하세요 ' + validUser.user_id + '님');
+                    loggedIn = true;
+                    $('#userGreeting').text(validUser.user_id);
+                    $('#delete_user_id').val(validUser.user_id);
+                    $('#login').hide();
+                    $('#delete_account').show();
+                    $('.main-page').show();
+                } else {
+                    alert('아이디 또는 비밀번호가 잘못되었습니다.');
+                }
+            },
+            error: function() {
+                alert('로그인 중 오류가 발생했습니다.');
+            }
+        });
+    });  
+*/
+
+ ///-----------------------
+    // 회원가입 폼 처리
+  /*   $('#signup').bind('submit', function(e){
+        e.preventDefault();
+        alert('회원가입 되었습니다.');
+        $('#signup').hide();
+        $('#login').show();
+    }); */
+
+    
+ 
+
+    // 회원탈퇴 폼 처리
+    $('#delete_account').bind('submit', function(e){
+        e.preventDefault();
+        if (!loggedIn) {
+            alert('로그인 후에 회원탈퇴를 할 수 있습니다.');
+            return false;
+        }
+
+        if (confirm('정말로 회원탈퇴를 하시겠습니까?')) {
+            alert('회원탈퇴 요청을 처리합니다.');
+            loggedIn = false;
+            $('#delete_account').hide();
+            $('#login_user_id').val('');
+            $('#login_user_password').val('');
+            $('#login').show();
+            $('#userGreeting').text('사용자님');
+            $('.main-page').show();
+        }
+    });
+
+     //다시 페이지 이동 
+    $('#deleteAccountButton').on('click', function() {
+        if (loggedIn) {
+            window.location.href ='../project/deleteAccount.jsp';
+        } else {
+            alert("로그인 후 이용 가능합니다.");
+        }
+    });
+    // 게시판 버튼 클릭 시 게시판 페이지로 이동
+   $('#boardButton').on('click', function(){
+                if (loggedIn) {
+                    window.location.href = 'board.html';
+                } else {
+                    alert('로그인 후 게시판을 이용할 수 있습니다.');
+                }
+    });
+});
+</script>
