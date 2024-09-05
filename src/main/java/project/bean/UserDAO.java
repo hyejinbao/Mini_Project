@@ -8,141 +8,101 @@ import java.sql.SQLException;
 
 
 public class UserDAO {
- private Connection conn;
- private PreparedStatement pstmt;
- private ResultSet rs;
 
- // 데이터베이스 연결 메서드
- public Connection getConnection() {
-	 Connection conn = null;
-     try {
-         Class.forName("oracle.jdbc.driver.OracleDriver");
-         conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "C##JAVA", "1234");
-     } catch (Exception e) {
-         e.printStackTrace();
-     }
-     return conn;
- 
- }
+	private String driver = "oracle.jdbc.driver.OracleDriver";
+	private String url = "jdbc:oracle:thin:@localhost:1521:xe";
+	private String username = "c##java";
+	private String password = "1234";
 
- //private void close(AutoCloseable... resources) {
- 
- public void close(AutoCloseable... resources) {
-     try {
-         for (AutoCloseable resource : resources) {
-             if (resource != null) {
-                 resource.close();
-             }
-         }
-     } catch (Exception e) {
-         e.printStackTrace();
-     }
- }
+	private Connection con;
+	private PreparedStatement pstmt;
+	private ResultSet rs;
 
- // 회원가입 메서드
- public int insertUser(UserDTO userDTO) {
-     int result = 0;
-     try {
-         conn = getConnection();
-         conn.setAutoCommit(false); // 자동 커밋 비활성화
+	private static UserDAO UserDAO = new UserDAO();
 
-         String sql = "INSERT INTO USER_WEB (ID, PASSWORD, EMAIL, NAME, PHONE) VALUES (?, ?, ?, ?, ?)";
-         pstmt = conn.prepareStatement(sql);
-         pstmt.setString(1, userDTO.getId());
-         pstmt.setString(2, userDTO.getPassword()); 
-         pstmt.setString(3, userDTO.getEmail());
-         pstmt.setString(4, userDTO.getName());
-         pstmt.setString(5, userDTO.getPhone());
+	public static UserDAO getInstance() {
+		return UserDAO;
+	}
 
-         result = pstmt.executeUpdate();
-         conn.commit(); // 트랜잭션 커밋
+	private UserDAO() {
+		try {
+			Class.forName(driver);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 
-     } catch (SQLException e) {
-         try {
-             if (conn != null) {
-                 conn.rollback(); // 예외 발생 시 롤백
-             }
-         } catch (SQLException rollbackEx) {
-             rollbackEx.printStackTrace();
-         }
-         e.printStackTrace();
-     } finally {
-         close(pstmt, conn); // 자원 해제
-     }
+	public void getConnection() {
+		try {
+			con = DriverManager.getConnection(url, username, password);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
-     return result;
- }
+	public int insertUser(UserDTO userDTO) {
+		int result = 0;
+		getConnection();
+		try {
+			String sql = "INSERT INTO USER_WEB (ID, PASSWORD, EMAIL, NAME, PHONE) VALUES (?, ?, ?, ?, ?)";
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, userDTO.getId());
+			pstmt.setString(2, userDTO.getPassword());
+			pstmt.setString(3, userDTO.getEmail());
+			pstmt.setString(4, userDTO.getName());
+			pstmt.setString(5, userDTO.getPhone());
 
- // 유저 검색 메서드 (예: 로그인 시 사용)
- public UserDTO getUserById(String id) {
-     UserDTO user = null;
-     try {
-         conn = getConnection();
+			result = pstmt.executeUpdate();
 
-         String sql = "SELECT * FROM USER_WEB WHERE ID = ?";
-         pstmt = conn.prepareStatement(sql);
-         pstmt.setString(1, id);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (pstmt != null)
+					pstmt.close();
+				if (con != null)
+					con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
 
-         rs = pstmt.executeQuery();
+	public boolean loginUser(String id, String password) {
+	   boolean loginok = false;
+		try {
+			getConnection();
 
-         if (rs.next()) {
-             user = new UserDTO();
-             user.setId(rs.getString("ID"));
-             user.setPassword(rs.getString("PASSWORD"));
-             user.setName(rs.getString("NAME"));
-             user.setEmail(rs.getString("EMAIL"));
-             user.setPhone(rs.getString("PHONE"));
-        //     user.setCreatedAt(rs.getDate("CREATED_AT"));
-         }
+			String sql = "SELECT * FROM USER_WEB WHERE ID = ? and Password =?";
+			
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, id);
+			pstmt.setString(2, password);
 
-     } catch (SQLException e) {
-         e.printStackTrace();
-     } finally {
-         close(rs, pstmt, conn); // 자원 해제
-     }
+			rs = pstmt.executeQuery();
 
-     return user;
- }
+			if (rs.next()) {
+			     loginok = true;  	
+			}else{
+				 loginok = false;  	
+			}
 
- // 유저 삭제 메서드
- public int deleteUser(String id) {
-     int result = 0;
-     try {
-         conn = getConnection();
-         conn.setAutoCommit(false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (pstmt != null)
+					pstmt.close();
+				if (con != null)
+					con.close(); 	
+				if (rs!= null)
+					rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return loginok;
+	}
 
-         String sql = "DELETE FROM USER_WEB WHERE ID = ?";
-         pstmt = conn.prepareStatement(sql);
-         pstmt.setString(1, id);
-
-         result = pstmt.executeUpdate();
-         conn.commit();
-
-     } catch (SQLException e) {
-         try {
-             if (conn != null) {
-                 conn.rollback();
-             }
-         } catch (SQLException rollbackEx) {
-             rollbackEx.printStackTrace();
-         }
-         e.printStackTrace();
-     } finally {
-         close(pstmt, conn);
-     }
-
-     return result;
- }
 }
-
- // 자원 해제 메서드
-	/*
-	 * private void close() { try { if (rs != null) rs.close(); if (pstmt != null)
-	 * pstmt.close(); if (conn != null) conn.close(); } catch (Exception e) {
-	 * e.printStackTrace(); } }
-	 */
- 
- 
- 
-
-
